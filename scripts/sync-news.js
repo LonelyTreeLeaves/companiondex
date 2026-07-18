@@ -10,9 +10,28 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const feeds = [
   {
-    game_name: "Gaming News",
-    source_name: "IGN",
-    feed_url: "https://feeds.ign.com/ign/games-all",
+    game_name: "Marvel Rivals",
+    source_name: "Marvel Rivals Official",
+    feed_url: "https://www.marvelrivals.com/news/rss.xml",
+    keywords: ["marvel rivals", "season", "hero", "patch", "update"],
+  },
+  {
+    game_name: "Palia",
+    source_name: "Palia Official",
+    feed_url: "https://palia.com/news/rss.xml",
+    keywords: ["palia", "patch", "update", "event"],
+  },
+  {
+    game_name: "Animal Crossing",
+    source_name: "Nintendo Life",
+    feed_url: "https://www.nintendolife.com/feeds/latest",
+    keywords: ["animal crossing", "new horizons"],
+  },
+  {
+    game_name: "Pokémon",
+    source_name: "Nintendo Life",
+    feed_url: "https://www.nintendolife.com/feeds/latest",
+    keywords: ["pokemon", "pokémon"],
   },
 ];
 
@@ -29,7 +48,16 @@ async function syncFeed(feedConfig) {
 
   const feed = await parser.parseURL(feedConfig.feed_url);
 
-  const newsItems = feed.items.slice(0, 10).map((item) => ({
+  const matchingItems = feed.items.filter((item) => {
+    const searchableText = `${item.title || ""} ${item.contentSnippet || ""} ${item.content || ""}`
+      .toLowerCase();
+
+    return feedConfig.keywords.some((keyword) =>
+      searchableText.includes(keyword.toLowerCase())
+    );
+  });
+
+  const newsItems = matchingItems.slice(0, 10).map((item) => ({
     title: item.title || "Untitled",
     game_name: feedConfig.game_name,
     source_name: feedConfig.source_name,

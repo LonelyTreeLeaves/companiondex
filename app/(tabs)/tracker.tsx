@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   ScrollView,
   View,
@@ -14,10 +15,22 @@ export default function TrackerScreen() {
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [gameName, setGameName] = useState("");
+  const [itemType, setItemType] = useState("Goal");
+  const [academyCompleted, setAcademyCompleted] = useState(0);
 
   useEffect(() => {
     loadItems();
+    loadAcademyProgress();
   }, []);
+
+  async function loadAcademyProgress() {
+    const stored = await AsyncStorage.getItem("academy-completed");
+
+    if (stored) {
+      const lessons = JSON.parse(stored);
+      setAcademyCompleted(lessons.length);
+    }
+  }
 
   async function loadItems() {
     const { data, error } = await supabase
@@ -40,11 +53,13 @@ export default function TrackerScreen() {
       title,
       note,
       game_name: gameName,
+      item_type: itemType,
     });
 
     setTitle("");
     setNote("");
     setGameName("");
+    setItemType("Goal");
     loadItems();
   }
 
@@ -66,6 +81,86 @@ export default function TrackerScreen() {
     loadItems();
   }
 
+  function renderSection(title: string, sectionItems: any[]) {
+    return (
+      <>
+        <Text style={styles.sectionTitle}>
+          {title}
+        </Text>
+
+        {sectionItems.map((item) => (
+          <View key={item.id} style={styles.card}>
+            <Text style={styles.game}>
+              {item.game_name || "General"}
+            </Text>
+
+            <Text style={styles.itemType}>
+              {item.item_type || "Goal"}
+            </Text>
+
+            <Text
+              style={[
+                styles.cardTitle,
+                item.completed && styles.doneText,
+              ]}
+            >
+              {item.title}
+            </Text>
+
+            {item.note ? (
+              <Text style={styles.note}>{item.note}</Text>
+            ) : null}
+
+            <View style={styles.row}>
+              <Pressable
+                style={[
+                  styles.smallButton,
+                  item.completed && styles.completeButton,
+                ]}
+                onPress={() => toggleComplete(item)}
+              >
+                <Text style={styles.smallButtonText}>
+                  {item.completed ? "Done" : "Complete"}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.deleteButton}
+                onPress={() => deleteItem(item.id)}
+              >
+                <Text style={styles.deleteText}>
+                  Delete
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ))}
+      </>
+    );
+  }
+
+  const goals = items.filter(
+    (item) => item.item_type === "Goal"
+  );
+
+  const builds = items.filter(
+    (item) => item.item_type === "Build"
+  );
+
+  const reminders = items.filter(
+    (item) => item.item_type === "Reminder"
+  );
+
+  const progressItems = items.filter(
+    (item) => item.item_type === "Progress"
+  );
+
+  const totalItems = items.length;
+  const completedItems = items.filter((item) => item.completed).length;
+
+  const completionPercent =
+    totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Tracker</Text>
@@ -73,6 +168,60 @@ export default function TrackerScreen() {
       <Text style={styles.subtitle}>
         Save goals, reminders, builds, and progress.
       </Text>
+
+      <View style={styles.summaryCard}>
+        <Text style={styles.summaryTitle}>Tracker Summary</Text>
+        <Text style={styles.summaryText}>🎯 Goals: {goals.length}</Text>
+        <Text style={styles.summaryText}>🛠 Builds: {builds.length}</Text>
+        <Text style={styles.summaryText}>⏰ Reminders: {reminders.length}</Text>
+        <Text style={styles.summaryText}>📈 Progress: {progressItems.length}</Text>
+        <Text style={styles.summaryText}>✅ Completed: {completedItems}</Text>
+        <Text style={styles.summaryText}>
+          🎓 Academy Lessons: {academyCompleted}
+        </Text>
+        <Text style={styles.summaryText}>
+          📊 Completion Rate: {completionPercent}%
+        </Text>
+      </View>
+
+      <View style={styles.quickAddRow}>
+        {[
+          { label: "🎯 New Goal", type: "Goal" },
+          { label: "🛠 New Build", type: "Build" },
+          { label: "⏰ New Reminder", type: "Reminder" },
+          { label: "📈 New Progress", type: "Progress" },
+        ].map((quick) => (
+          <Pressable
+            key={quick.type}
+            style={styles.quickAddButton}
+            onPress={() => setItemType(quick.type)}
+          >
+            <Text style={styles.quickAddText}>{quick.label}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <View style={styles.typeRow}>
+        {["Goal", "Build", "Reminder", "Progress"].map((type) => (
+          <Pressable
+            key={type}
+            style={[
+              styles.typeButton,
+              itemType === type && styles.typeButtonActive,
+            ]}
+            onPress={() => setItemType(type)}
+          >
+            <Text
+              style={[
+                styles.typeButtonText,
+                itemType === type && styles.typeButtonTextActive,
+              ]}
+            >
+              {type}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
 
       <TextInput
         placeholder="Game name"
@@ -103,47 +252,13 @@ export default function TrackerScreen() {
         <Text style={styles.buttonText}>Add Item</Text>
       </Pressable>
 
-      {items.map((item) => (
-        <View key={item.id} style={styles.card}>
-          <Text style={styles.game}>
-            {item.game_name || "General"}
-          </Text>
+      {renderSection("🎯 Goals", goals)}
 
-          <Text
-            style={[
-              styles.cardTitle,
-              item.completed && styles.doneText,
-            ]}
-          >
-            {item.title}
-          </Text>
+      {renderSection("🛠 Builds", builds)}
 
-          {item.note ? (
-            <Text style={styles.note}>{item.note}</Text>
-          ) : null}
+      {renderSection("⏰ Reminders", reminders)}
 
-          <View style={styles.row}>
-            <Pressable
-              style={[
-                styles.smallButton,
-                item.completed && styles.completeButton,
-              ]}
-              onPress={() => toggleComplete(item)}
-            >
-              <Text style={styles.smallButtonText}>
-                {item.completed ? "Done" : "Complete"}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={styles.deleteButton}
-              onPress={() => deleteItem(item.id)}
-            >
-              <Text style={styles.deleteText}>Delete</Text>
-            </Pressable>
-          </View>
-        </View>
-      ))}
+      {renderSection("📈 Progress", progressItems)}
     </ScrollView>
   );
 }
@@ -165,6 +280,45 @@ const styles = StyleSheet.create({
     color: "#CBD5E1",
     marginTop: 8,
     marginBottom: 18,
+  },
+  summaryCard: {
+    backgroundColor: "#111827",
+    padding: 18,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "#334155",
+    marginBottom: 18,
+  },
+  quickAddRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 14,
+  },
+  quickAddButton: {
+    backgroundColor: "#1E293B",
+    borderWidth: 1,
+    borderColor: "#334155",
+    borderRadius: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  quickAddText: {
+    color: "#F8FAFC",
+    fontWeight: "900",
+    fontSize: 13,
+  },
+  summaryTitle: {
+    color: "#F8FAFC",
+    fontSize: 20,
+    fontWeight: "900",
+    marginBottom: 8,
+  },
+  summaryText: {
+    color: "#CBD5E1",
+    fontSize: 15,
+    fontWeight: "800",
+    marginBottom: 4,
   },
   input: {
     backgroundColor: "#0F172A",
@@ -189,6 +343,43 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontWeight: "900",
+  },
+  sectionTitle: {
+    color: "#F8FAFC",
+    fontSize: 24,
+    fontWeight: "900",
+    marginTop: 20,
+    marginBottom: 12,
+  },
+  typeRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 14,
+  },
+  typeButton: {
+    backgroundColor: "#0F172A",
+    borderWidth: 1,
+    borderColor: "#334155",
+    borderRadius: 999,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+  },
+  typeButtonActive: {
+    backgroundColor: "#6366F1",
+    borderColor: "#818CF8",
+  },
+  typeButtonText: {
+    color: "#94A3B8",
+    fontWeight: "900",
+  },
+  typeButtonTextActive: {
+    color: "#F8FAFC",
+  },
+  itemType: {
+    color: "#A5B4FC",
+    fontWeight: "900",
+    marginBottom: 6,
   },
   card: {
     backgroundColor: "#0F172A",

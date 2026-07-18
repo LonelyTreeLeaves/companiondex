@@ -1,6 +1,14 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, View, Text, TextInput, StyleSheet } from "react-native";
+import {
+  ScrollView,
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Image,
+  Pressable,
+} from "react-native";
 import { supabase } from "../../lib/supabase";
 
 export default function HomeScreen() {
@@ -32,12 +40,16 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.smallTitle}>CompanionDex</Text>
+      <Text style={styles.smallTitle}>
+        QuestBind • Beta
+      </Text>
 
-      <Text style={styles.title}>Your gaming companion app</Text>
+      <Text style={styles.title}>
+        Bound by Adventure.
+      </Text>
 
       <Text style={styles.subtitle}>
-        Search game data, track collections, save notes, and keep guides in one place.
+        Guided by Buss and Snee. Track progress, discover guides, save builds, and master your favourite games.
       </Text>
 
       <TextInput
@@ -46,45 +58,120 @@ export default function HomeScreen() {
         style={styles.search}
       />
 
-      <View style={styles.statsRow}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{gameCount}</Text>
-          <Text style={styles.statLabel}>Games</Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{entryCount}</Text>
-          <Text style={styles.statLabel}>Entries</Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{trackerCount}</Text>
-          <Text style={styles.statLabel}>Tracker</Text>
-        </View>
+      <View style={styles.bannerContainer}>
+        <Image
+          source={require("../../assets/images/banner.png")}
+          style={styles.banner}
+          resizeMode="cover"
+        />
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Marvel Rivals Tools</Text>
+      <View style={styles.quickGrid}>
+
+        <Pressable
+          style={styles.quickCard}
+          onPress={() =>
+            router.push("/game/marvel-rivals/academy")
+          }
+        >
+          <Text style={styles.quickEmoji}>🎓</Text>
+          <Text style={styles.quickTitle}>Academy</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.quickCard}
+          onPress={() =>
+            router.push("/games")
+          }
+        >
+          <Text style={styles.quickEmoji}>🎮</Text>
+          <Text style={styles.quickTitle}>Games</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.quickCard}
+          onPress={() =>
+            router.push("/database")
+          }
+        >
+          <Text style={styles.quickEmoji}>📚</Text>
+          <Text style={styles.quickTitle}>Database</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.quickCard}
+          onPress={() =>
+            router.push("/tracker")
+          }
+        >
+          <Text style={styles.quickEmoji}>🎯</Text>
+          <Text style={styles.quickTitle}>Tracker</Text>
+        </Pressable>
+
+      </View>
+
+      <Pressable
+        style={styles.heroCard}
+        onPress={() => router.push("/game/marvel-rivals/academy")}
+      >
+        <Text style={styles.heroTitle}>
+          🎓 Continue Your Journey
+        </Text>
+
+        <Text style={styles.heroText}>
+          Continue your Academy lessons and become a better Marvel Rivals player.
+        </Text>
+
+        <Text style={styles.heroButton}>
+          Continue Academy →
+        </Text>
+      </Pressable>
+
+      <Pressable
+        style={styles.card}
+        onPress={() => router.push("/game/marvel-rivals/guides")}
+      >
+        <Text style={styles.cardTitle}>🐶 Snee Recommends</Text>
 
         <Text style={styles.cardText}>
-          Pick an enemy hero and find suggested counters.
+          New to Marvel Rivals?
         </Text>
 
-        <Text
-          style={styles.linkButton}
-          onPress={() => router.push("/counter-picker")}
-        >
-          Open Counter Picker →
+        <Text style={styles.cardText}>
+          • Beginner Guide
         </Text>
-      </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Connected Features</Text>
-        <Text style={styles.cardText}>✅ Supabase games</Text>
-        <Text style={styles.cardText}>✅ Searchable database</Text>
-        <Text style={styles.cardText}>✅ Clickable game pages</Text>
-        <Text style={styles.cardText}>✅ Saved tracker items</Text>
-      </View>
+        <Text style={styles.cardText}>
+          • Objectives Academy
+        </Text>
+
+        <Text style={styles.cardText}>
+          • Team Compositions
+        </Text>
+
+        <Text style={styles.linkButton}>
+          Start Learning →
+        </Text>
+      </Pressable>
+
+      <Pressable
+        style={styles.card}
+        onPress={() => router.push("/companions/buss")}
+      >
+        <Text style={styles.cardTitle}>🐱 Buss's Secret</Text>
+
+        <Text style={styles.cardText}>
+          Most players don't lose because of mechanics.
+        </Text>
+
+        <Text style={styles.cardText}>
+          They lose because they ignore objectives.
+        </Text>
+
+        <Text style={styles.linkButton}>
+          View Secret →
+        </Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -101,11 +188,69 @@ const styles = StyleSheet.create({
     color: "#818CF8",
     marginTop: 40,
   },
+  bannerContainer: {
+    borderRadius: 24,
+    overflow: "hidden",
+    marginTop: 20,
+  },
+  banner: {
+    width: "100%",
+    height:180,
+  },
   title: {
     fontSize: 36,
     fontWeight: "900",
     marginTop: 10,
     color: "#F8FAFC",
+  },
+  heroCard: {
+    backgroundColor: "#0F172A",
+    borderWidth: 1,
+    borderColor: "#334155",
+    borderRadius: 24,
+    padding: 22,
+    marginTop: 20,
+  },
+  heroTitle: {
+    color: "#F8FAFC",
+    fontSize: 24,
+    fontWeight: "900",
+  },
+  heroText: {
+    color: "#CBD5E1",
+    marginTop: 10,
+    lineHeight: 22,
+    fontSize: 15,
+  },
+  heroButton: {
+    color: "#818CF8",
+    fontWeight: "900",
+    marginTop: 14,
+    fontSize: 16,
+  },
+  quickGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    marginBottom: 20,
+  },
+  quickCard: {
+    width: "48%",
+    backgroundColor: "#0F172A",
+    borderRadius: 22,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#334155",
+    alignItems: "center",
+  },
+  quickEmoji: {
+    fontSize: 34,
+  },
+  quickTitle: {
+    color: "#F8FAFC",
+    fontWeight: "900",
+    fontSize: 18,
+    marginTop: 10,
   },
   subtitle: {
     fontSize: 16,

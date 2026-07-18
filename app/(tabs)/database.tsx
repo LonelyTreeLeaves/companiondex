@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { ScrollView, View, Text, TextInput, StyleSheet } from "react-native";
+import { ScrollView, View, Text, TextInput, StyleSheet, Pressable } from "react-native";
+import { useRouter } from "expo-router";
 import { supabase } from "../../lib/supabase";
 
 export default function DatabaseScreen() {
   const [entries, setEntries] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     loadEntries();
@@ -53,13 +55,16 @@ export default function DatabaseScreen() {
       />
 
       {filteredEntries.map((entry) => (
-        <View key={entry.id} style={styles.card}>
+        <Pressable
+          key={entry.id}
+          style={styles.card}
+          onPress={() => router.push(`/entry/${entry.id}`)}
+        >
           <Text style={styles.gameName}>{entry.games?.name}</Text>
           <Text style={styles.category}>{entry.category}</Text>
           <Text style={styles.cardTitle}>{entry.title}</Text>
-          <Text style={styles.summary}>{entry.summary}</Text>
-          <Text style={styles.content}>{entry.content}</Text>
-        </View>
+          <Text style={styles.tapText}>View full entry →</Text>
+        </Pressable>
       ))}
     </ScrollView>
   );
@@ -91,6 +96,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#334155",
     marginBottom: 18,
+  },
+  tapText: {
+    color: "#818CF8",
+    fontWeight: "900",
+    marginTop: 8,
+    fontSize: 14,
   },
   card: {
     backgroundColor: "#0F172A",

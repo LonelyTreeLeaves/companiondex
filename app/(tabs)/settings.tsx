@@ -1,41 +1,74 @@
-import { ScrollView, View, Text, StyleSheet } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Pressable } from "react-native";
+import { useRouter } from "expo-router";
 
 export default function SettingsScreen() {
+  const router = useRouter();
+
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
+      <Text style={styles.title}>QuestBind</Text>
 
       <Text style={styles.subtitle}>
-        Manage CompanionDex options and future app features.
+        Quick access to your companions, academy, tracker and app tools.
       </Text>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Favourite Games</Text>
+      <Pressable
+        style={styles.card}
+        onPress={() => router.push("/companions")}
+      >
+        <Text style={styles.cardTitle}>🐶 Companion Hub</Text>
         <Text style={styles.cardText}>
-          Later this will let users choose which games appear on the Home screen.
+          Visit Snee and Buss and track your progress.
+        </Text>
+      </Pressable>
+
+      <Pressable
+        style={styles.card}
+        onPress={() => router.push("/game/marvel-rivals/academy")}
+      >
+        <Text style={styles.cardTitle}>🎓 Academy</Text>
+        <Text style={styles.cardText}>
+          Continue lessons and improve your Academy Rank.
+        </Text>
+      </Pressable>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>ℹ️ About QuestBind</Text>
+        <Text style={styles.cardText}>
+          QuestBind is a community gaming companion app featuring guides,
+          databases, trackers, companions, and learning systems.
         </Text>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Data Sources</Text>
+      <Pressable
+        style={styles.card}
+        onPress={() => router.push("/news")}
+      >
+        <Text style={styles.cardTitle}>📰 News Feed</Text>
         <Text style={styles.cardText}>
-          Future setup for APIs, wiki data, guide indexes, and source syncing.
+          View the latest game news and updates.
         </Text>
-      </View>
+      </Pressable>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Account</Text>
+      <Pressable
+        style={styles.card}
+        onPress={() => router.push("/database")}
+      >
+        <Text style={styles.cardTitle}>📚 Database</Text>
         <Text style={styles.cardText}>
-          Later this will connect to Supabase login so notes and trackers save per user.
+          Browse every guide, hero, item and game entry.
         </Text>
-      </View>
+      </Pressable>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Offline Mode</Text>
+      <Pressable
+        style={styles.card}
+        onPress={() => router.push("/tracker")}
+      >
+        <Text style={styles.cardTitle}>✅ Tracker</Text>
         <Text style={styles.cardText}>
-          Future feature to keep saved database entries available without internet.
+          View and manage your saved tracker items.
         </Text>
-      </View>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -66,6 +99,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#334155",
     marginBottom: 14,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   cardTitle: {
     fontSize: 22,
